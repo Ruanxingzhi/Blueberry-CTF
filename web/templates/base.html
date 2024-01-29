@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.svg">
+
+    {% if config['USE_LOCAL_RESOURCES'] == 'yes' %}
+    <script src="/static/js/jquery-3.6.4.min.js"></script>
+    <script src="/static/js/marked-4.3.0.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/fomantic-official/semantic.min.css">
+    <script src="/static/fomantic-official/semantic.min.js"></script>
+    {% else %}
+    <script src="https://cdn.staticfile.org/jquery/3.6.4/jquery.js"></script>
+    <script src="https://cdn.staticfile.org/marked/4.3.0/marked.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/fomantic-ui/2.9.2/semantic.min.css">
+    <script src="https://cdn.staticfile.org/fomantic-ui/2.9.2/semantic.min.js"></script>
+    {% endif %}
+
+    <!-- TODO: Katex supported -->
+    <!-- <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.16.9/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/UziTech/marked-katex-extension@1.0.2/lib/index.umd.js"></script> -->
+
+    {#
+    <script src="/static/js/main.js"></script> #}
+    <link href="/static/css/main.css" rel="stylesheet">
+
+    <title>{{config['SITE_NAME']}}</title>
+</head>
+
+<body>
+    <div class="outer">
+        {% include "components/navbar.html" %}
+
+        {% block basic %}
+        Basic Block
+        {% endblock %}
+    </div>
+
+    <script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            $(".ui:not(.hidden)").addClass("inverted");
+        }
+        $('.outer').show();
+
+        $('.markd').each((i, e) => {
+            // marked.use(markedKatex());
+            e.innerHTML = marked.parse(e.innerHTML, { breaks: true })
+        })
+
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            const newColorScheme = event.matches ? "dark" : "light";
+            console.log(newColorScheme)
+            if (newColorScheme == "dark") {
+                $(".ui:not(.hidden)").addClass("inverted");
+            } else {
+                $(".ui:not(.hidden)").removeClass("inverted");
+            }
+        });
+
+
+        {% for x in get_flashed_messages(category_filter = ["error"]) %}
+        $.toast({
+            class: 'error',
+            title: 'Error',
+            displayTime: 0,
+            message: "{{x}}"
+        });
+        {% endfor %}
+
+        {% for x in get_flashed_messages(category_filter = ["warning"]) %}
+        $.toast({
+            class: 'warning',
+            title: 'Fail',
+            showProgress: 'bottom',
+            message: "{{x}}"
+        });
+        {% endfor %}
+
+        {% for x in get_flashed_messages(category_filter = ["success"]) %}
+        $.toast({
+            class: 'success',
+            title: 'Success',
+            showProgress: 'bottom',
+            message: "{{x}}"
+        });
+        {% endfor %}
+
+        {% for x in get_flashed_messages(category_filter = ["info"]) %}
+        $.toast({
+            title: 'Info',
+            showProgress: 'bottom',
+            message: "{{x}}"
+        });
+        {% endfor %}
+    </script>
+</body>
+
+</html>

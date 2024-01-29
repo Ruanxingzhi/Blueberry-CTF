@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% set nav = 'manage' %}
+
+{% block basic %}
+<div class="ui container">
+
+    <div class="ui grid">
+        <div class="three wide column">
+            <div class="ui fluid vertical menu">
+                <a class="item {{'active' if menu_active == 'board'}}" href="{{url_for('admin.show_admin_board')}}">
+                    Board
+                </a>
+                <a class="item {{'active' if menu_active == 'site'}}" href="{{url_for('admin.show_site_config')}}">
+                    Site
+                </a>
+                <a class="item {{'active' if menu_active == 'user'}}" href="{{url_for('admin.show_user_list')}}">
+                    Users
+                </a>
+                <a class="item {{'active' if menu_active == 'problem'}}" href="{{url_for('admin.show_problem_list')}}">
+                    Problems
+                </a>
+            </div>
+        </div>
+        <div class="thirteen wide column" >
+            {% block body %}
+
+            {% endblock %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

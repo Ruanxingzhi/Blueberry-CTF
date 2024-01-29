@@ -1,0 +1,38 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "user" %}
+
+{% block body %}
+
+
+<div>
+    <table class="ui basic compact selectable table">
+        <thead>
+            <tr>
+                <th class="one wide">ID</th>
+                <th class="two wide">Username</th>
+                <th class="two wide">Register</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr onclick="window.location.href = '{{url_for('admin.show_user_detail', uid=u.id)}}'">
+                <td>
+                    {{u.id}}
+                    {% if u.is_admin %}<i class='blue user secret icon'></i>{% endif %}
+                    {% if not u.is_visible %}<i class="red eye slash icon"></i>{% endif %}
+                </td>
+                <td>
+                    <img class="ui avatar rounded image" src="{{avatar_url(u, 64)}}" alt="avatar"> {{u.username}}
+                </td>
+                <td>
+                    {{u.register_time}}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}

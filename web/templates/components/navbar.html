@@ -1,0 +1,45 @@
+<div id="navbar">
+    <div class="ui borderless top fixed menu">
+        <div class="ui container">
+            <a class="{{'active' if nav == 'home'}} vertically fitted item" href="/">
+                {% if config["SHOW_LOGO"] == '1' %}
+                <img class="ui image" style="height: 2rem;" src="/static/img/logo.png">
+                {% else %}
+                <span><i class="home icon"></i>Home</span>
+                {% endif %}
+            </a>
+            <a class="{{'active' if nav == 'problems'}} item" href="/problem">
+                <span><i class="list icon"></i>Problems</span>
+            </a>
+            <a class="{{'active' if nav == 'rankings'}} item" href="/ranking">
+                <span><i class="award icon"></i>Rankings</span>
+            </a>
+
+            <div class="right menu">
+                {% if g.is_admin %}
+                <a class="ui item {{'active' if nav == 'manage'}}" href="{{url_for('admin.show_admin_board')}}">
+                    <i class="setting icon"></i>Manage
+                </a>
+                {% endif %}
+
+                {% if not g.user %}
+                <a class="ui item" href="{{url_for('user.show_login')}}">
+                    <i class="user icon"></i>Login
+                </a>
+                {% else %}
+                <div class="ui simple dropdown item">
+                    <img class="ui avatar spaced image" src="{{avatar_url(g.user, 64)}}"
+                        style="margin-top: -1em; margin-bottom: -1em;" alt="avatar">
+                    {{ g.user.username }}
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <a class="item" href="{{url_for('user.show_edit')}}">Profile</a>
+                        <a class="item" href="{{url_for('user.logout')}}">Logout</a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>

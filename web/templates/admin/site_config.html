@@ -1,0 +1,139 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "site" %}
+
+{% block body %}
+
+<div class="ui segments">
+    <div class="ui secondary segment">
+        General
+    </div>
+
+    <div class="ui segment">
+
+        <form class="ui form" method="post" action="{{url_for('admin.api_set_siteconfig')}}">
+            <div class="field">
+                <label>Site name</label>
+                <input type="text" name="site_name" value="{{site_config['site_name']}}">
+            </div>
+
+            <div class="field">
+                <label>Public registration</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="is_allow_register" value="{{site_config['is_allow_register']}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="yes"><i class="green lock open icon"></i>Allow new users</div>
+                        <div class="item" data-value="no"><i class="red lock icon"></i>Disallow new users</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Static resources</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="use_local_resources" value="{{site_config['use_local_resources']}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="yes"><i class="blue ethernet icon"></i>Local</div>
+                        <div class="item" data-value="no"><i class="green cloud icon"></i>CDN</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Gravatar</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="use_gravatar" value="{{site_config['use_gravatar']}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="yes"><i class="green cloud icon"></i>Use gravatar</div>
+                        <div class="item" data-value="no"><i class="blue user icon"></i>Use default user avatar</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Contest starts at</label>
+                <div class="ui calendar" id="start_time">
+                    <div class="ui fluid input left icon">
+                      <i class="calendar icon"></i>
+                      <input type="text" name="start_time" placeholder="Date/Time" value="{{site_config['start_time']}}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Contest ends at</label>
+                <div class="ui calendar" id="end_time">
+                    <div class="ui fluid input left icon">
+                      <i class="calendar icon"></i>
+                      <input type="text" name="end_time" placeholder="Date/Time" value="{{site_config['end_time']}}">
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                $('#start_time').calendar({
+                    formatter: {
+                        time: 'H:mm',
+                        cellTime: 'H:mm'
+                    }
+                });
+
+                $('#end_time').calendar({
+                    formatter: {
+                        time: 'H:mm',
+                        cellTime: 'H:mm'
+                    }
+                });
+            </script>
+
+            <div class="field">
+                <label>Decay lambda, please set it to 0.2 * (estimated number of players)</label>
+                <input type="text" name="decay_lambda" value="{{site_config['decay_lambda']}}">
+            </div>
+
+            <div class="field">
+                <label>User info extra fields (json list)</label>
+                <input type="text" name="userinfo_extra_fields" value="{{site_config['userinfo_extra_fields']}}">
+            </div>
+
+            <button class="ui button labeled icon" type="submit"><i class="pen icon"></i>Update</button>
+        </form>
+
+        <script>
+            $('.selection.dropdown').dropdown();
+        </script>
+
+
+    </div>
+
+</div>
+
+
+<div class="ui segments">
+    <div class="ui secondary segment">
+        Message board
+    </div>
+
+    <div class="ui segment">
+
+        <form class="ui form" method="post" action="{{url_for('admin.api_set_msgboard')}}">
+            <div class="field">
+                <textarea name="msgboard" style="font-family: Consolas;"
+                    rows="20">{{site_config['message_board']}}</textarea>
+            </div>
+
+            <button class="ui button labeled icon" type="submit"><i class="pen icon"></i>Update</button>
+        </form>
+    </div>
+
+</div>
+
+
+
+{% endblock %}

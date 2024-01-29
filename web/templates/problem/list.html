@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% set nav = 'problems' %}
+
+{% block basic %}
+
+<div class="ui text container">
+    <div class="ui fluid tiny icon input">
+        <input type="text" placeholder="Search..." id="search">
+        <i class="search icon"></i>
+    </div>
+</div>
+
+<div class="ui divider hidden"></div>
+
+
+
+<div class="ui container">
+    <table class="ui basic selectable unstackable large table">
+        <thead>
+            <tr>
+                <th class="one wide">Status</th>
+                <th class="one wide">Points</th>
+                <th class="four wide">Problem</th>
+                <th class="eight wide">Tags</th>
+                <th class="two wide ">Solves</th>
+            </tr>
+        </thead>
+        <tbody id="tablebody">
+            {% for x in g.problems %}
+            <tr onclick="goto_problem('{{x.id}}')">
+                <td>
+                    <span class="ui small text">
+                        {% for task in x.task_list %}
+                            {% if task in g.accepted %}
+                            <i class="fitted green circle icon"></i>
+                            {% else %}
+                            <i class="fitted circle outline icon"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                </td>
+
+                <td>{{x.total_point or ''}}</td>
+
+                <td>
+                    <span class="ui text" data-label="title"><span style="color: lightgrey">A{{x.id}}. </span>{{'<span class="ui red text">[hidden] </span>' | safe if not x.is_visible}}{{x.title}}</span>
+                </td>
+                
+                <td data-label="tags">
+                    <span class="ui horizontal labels">
+                        {% for tag in x.tag_list %}
+                        <a class="ui small label" data-label="tag" onclick="set_tag('{{tag}}')">{{tag}}</a>
+                        {% endfor %}
+                    </span>
+                </td>
+                <td data-label="solved">{{x.solve_info or ''}}</td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+const origin_table = $('#tablebody').clone();
+
+
+function do_search() {
+    const table = origin_table.clone();
+
+    $('#tablebody').empty();
+
+    const query_str = $('#search').val();
+    window.location.hash = query_str;
+    const query = query_str.toLowerCase();
+
+    for(let row of table.children()) {
+        const title = $(row).find('[data-label=title]').text();
+        let flag = false;
+
+        if(title.toLowerCase().includes(query)) {
+            flag = true;
+        }
+
+
+        for(tag of $(row).find('[data-label=tag]')) {
+            if(tag.innerText.toLowerCase() == query) {
+                flag = true;
+            }
+        }
+
+        if(flag) {
+            $('#tablebody').append(row);
+        }
+    }
+}
+
+$('#search').val(window.location.hash.replace('#', ''));
+
+do_search();
+
+$('#search').on("input", () => do_search());
+
+
+function goto_problem(dom) {
+    window.location.href = `/problem/${dom}`;
+}
+
+
+
+function set_tag(tag) {
+    $('#search').val(tag);
+    do_search();
+    event.stopPropagation();
+}
+
+</script>
+
+{% endblock %}

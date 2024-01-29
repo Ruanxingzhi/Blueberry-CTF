@@ -1,0 +1,62 @@
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #2d2f33;
+        color: #fff;
+    }
+
+    .ui.table.inverted {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: 0;
+    }
+
+    .ui.basic.inverted.table>tbody>tr>th, .ui.basic.inverted.table>thead>tr>th, .ui.basic.inverted.table>tr>th {
+        background: 0;
+    }
+
+    .ui.very.basic.table.inverted {
+        border: 0;
+    }
+
+    .ui.secondary.inverted.segment {
+        background: #2a2d31;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ui.inverted.segment, .ui.inverted.segments, .ui.inverted.segments.segment {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ui.inverted.label, .ui.inverted.labels .label {
+        color: #000;
+        background: #909090;
+    }
+}
+
+.outer {
+    width: 100%;
+    display: none;
+}
+
+.markd p>code {
+    padding: .2rem .4rem;
+    margin: 0;
+    font-size: 85%;
+    white-space: break-spaces;
+    background-color: rgba(175, 184, 193, 0.2);
+    border-radius: .4rem;
+}
+
+#navbar {
+    padding-bottom: 3rem;
+    margin-bottom: 2rem;
+}
+
+#navbar span {
+    font-size: 14px;
+}
+
+img {
+    max-width: 100%;
+}
+
+.toast-container {}

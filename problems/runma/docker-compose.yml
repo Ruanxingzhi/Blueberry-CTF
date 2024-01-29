@@ -1,0 +1,16 @@
+version: "3.1"
+
+services:
+  app:
+    container_name: runma
+    build: ./src
+    restart: always
+    ports:
+      - "24007:80"
+    # volumes:
+    #   - ./src/app:/var/www/html
+    deploy:
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 50M

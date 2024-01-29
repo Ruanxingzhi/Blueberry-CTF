@@ -1,0 +1,203 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "problem" %}
+
+{% block body %}
+
+{% set info = g.problem_info %}
+
+<div class="ui segments">
+    <div class="ui secondary segment">
+        <i class="info icon"></i>Basic info
+    </div>
+
+    <div class="ui segment">
+        <form class="ui form" method="post" action="{{url_for('admin.api_modify_problem', pid=info.id)}}">
+            <div class="field">
+              <label>Title</label>
+              <input type="text" name="title" value="{{info.title}}">
+            </div>
+            <div class="field">
+              <label>Description</label>
+              <textarea name="description">{{info.description}}</textarea>
+            </div>
+            <div class="field">
+                <label>Tag</label>
+                <input type="text" name="tag" value="{{info.tag or ''}}">
+              </div>
+            
+            <div class="field">
+                <label>Instance type</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="instance_type" value="{{info.instance_type}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="none">none</div>
+                        <div class="item" data-value="shared">shared</div>
+                        <div class="item" data-value="private">private</div>
+                    </div>
+                </div>
+            </div>
+
+            
+
+
+            <div class="field">
+                <label>Docker config</label>
+                <input type="text" name="docker_config" value="{{info.docker_config}}">
+            </div>
+
+            <div class="field">
+                <label>Visible</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="visible" value="{{info.is_visible}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="True"><i class="green eye icon"></i>Visible</div>
+                        <div class="item" data-value="False"><i class="red eye slash icon"></i>Hidden</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="ui primary button labeled icon" type="submit"><i class="pen icon"></i>Update</button>
+            <div class="ui red button labeled icon" onclick="window.location.href='{{url_for('admin.api_remove_problem', pid=info.id)}}'"><i class="delete icon"></i>Delete</div>
+
+        </form>
+    </div>
+</div>
+
+
+<div class="ui segments">
+    <div class="ui secondary segment">
+        <i class="tasks icon"></i>Tasks
+    </div>
+
+    {% for t in g.tasks %}
+
+    <div class="ui segment">
+        <div class="ui header">
+            Task #{{loop.index}} <span class="ui horizontal label">TaskID: {{t.id}}</span>
+        </div>
+        <form class="ui form"  method="post" action="{{url_for('admin.api_modify_task', tid=t.id)}}">
+            <input type="text" name="task_id" value="{{t.id}}" hidden>
+
+            <div class="field">
+              <label>Base point</label>
+              <input type="text" name="point" value="{{t.base_point}}" required>
+            </div>
+            <div class="field">
+                <label>Score calc type</label>
+
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="score_calc_type" value="{{t.score_calc_type}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="0"><i class="green grip lines icon"></i>Static Points</div>
+                        <div class="item" data-value="1"><i class="blue chartline icon"></i>Dynamic Points - Score decreases with more solvers</div>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+              <label>Checker</label>
+              <textarea name="checker" style="font-family: Consolas;" rows="3">{{t.checker}}</textarea>
+              <div style="padding-top: 0.5rem">
+                Templates: 
+                <div class="ui green tertiary button" onclick="fill_static_template(this)">Static flag</div>
+                <div class="ui violet tertiary button" onclick="fill_dynamic_template(this)">Dynamic flag</div>
+              </div>
+            </div>
+
+            <button class="ui button labeled icon" type="submit"><i class="pen icon"></i>Update</button>
+            <div class="ui red button labeled icon" onclick="window.location.href='{{url_for('admin.api_remove_task', pid=info.id, tid=t.id)}}'"><i class="delete icon"></i>Delete</div>
+        </form>
+    </div>
+
+    {% endfor %}
+
+
+    <div class="ui segment">
+        <div class="ui header">
+            Add task
+        </div>
+        <form class="ui form"  method="post" action="{{url_for('admin.api_add_task', pid=info.id)}}">
+            <div class="field">
+              <label>Base point</label>
+              <input type="text" name="point" placeholder=" " required>
+            </div>
+            <div class="field">
+              <label>Checker</label>
+              <textarea name="checker" style="font-family: Consolas;" rows="3" placeholder="Provide a function `check(flag)`" required></textarea>
+              <div style="padding-top: 0.5rem">
+                Templates: 
+                <div class="ui green tertiary button" onclick="fill_static_template(this)">Static flag</div>
+                <div class="ui violet tertiary button" onclick="fill_dynamic_template(this)">Dynamic flag</div>
+              </div>
+            </div>
+
+            <button class="ui green button labeled icon" type="submit"><i class="plus icon"></i>Add</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function fill_static_template(dom) {
+    $(dom.parentNode.parentNode).children('[name=checker]').val('def check(s):\n    return s == "Lilac{example-114514-1919810}"')
+}
+
+function fill_dynamic_template(dom) {
+    $(dom.parentNode.parentNode).children('[name=checker]').val('def check(s):\n    return s == dynamic_flag')
+}
+</script>
+
+
+<div class="ui segments">
+    <div class="ui secondary segment">
+        <i class="file icon"></i>Files
+    </div>
+
+    <div class="ui segment">
+        <table class="ui very basic fixed single line table">
+            <thead>
+                <tr>
+                    <th class="one wide">Filename</th>
+                    <th class="one wide">Upload time</th>
+                    <th class="two wide">Download key</th>
+                    <th class="one wide">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in g.files %}
+                <tr>
+                    <td><a href="{{url_for('file.send_file', key=f.download_key, filename=f.filename)}}"><i
+                        class="download icon"></i>{{f.filename}}</a></td>
+                    <td>{{f.upload_time}}</td>
+                    <td>{{f.download_key}}</td>
+                    <td><a style="color:coral" href="{{url_for('admin.api_remove_file', fid=f.id)}}"><i class="circle minus icon"></i>Remove</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <form method="post" enctype="multipart/form-data" action="{{url_for('admin.api_add_file', pid=info.id)}}">
+            <div class="ui form" style="padding-top: 1em;">
+                <div class="field">
+                    <div class="ui file input">
+                        <input type="file" name="file" required>
+                    </div>
+                </div>
+        
+                <button class="ui primary button" type="submit">Upload</button>
+            </div>
+        </form>
+    
+    </div>
+</div>
+
+<script>
+    $('.selection.dropdown').dropdown();
+</script>
+
+{% endblock %}

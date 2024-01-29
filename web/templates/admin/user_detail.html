@@ -1,0 +1,114 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "user" %}
+
+{% block body %}
+
+
+<div>
+    <div class="ui segments">
+        <div class="ui secondary segment">
+            <i class="user icon"></i>User info
+        </div>
+    
+        <div class="ui segment">
+            <table class="ui very basic fixed single line table">
+                <tbody>
+                    <tr>
+                        <td class="two wide">ID</td>
+                        <td>
+                            {{g.info.id}}
+                            {% if g.info.is_admin %}<i class='blue user secret icon'></i>{% endif %}
+                            {% if not g.info.is_visible %}<i class="red eye slash icon"></i>{% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Username</td>
+                        <td>{{g.info.username}}</td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Email</td>
+                        <td>{{g.info.email}}</td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Register</td>
+                        <td>{{g.info.register_time}}</td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Extra info</td>
+                        <td>{{g.info.extra_info}}</td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Is admin?</td>
+                        <td>
+                            {% if g.info.is_admin %}
+                            <span class="ui primary horizontal label">Admin</span>
+
+                            <a href="{{url_for('admin.api_unset_admin', uid=g.info.id)}}">
+                                <i class="times icon"></i>Unset
+                            </a>
+                            {% else %}
+                            <span class="ui horizontal label">Not admin</span>
+
+                            <a href="{{url_for('admin.api_set_admin', uid=g.info.id)}}">
+                                <i class="tools icon"></i>Set
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="two wide">Is visible?</td>
+                        <td>
+                            {% if g.info.is_visible %}
+                            <span class="ui horizontal label">Visible</span>
+
+                            <a href="{{url_for('admin.api_unset_visible', uid=g.info.id)}}">
+                                <i class="eye slash icon"></i>Hide
+                            </a>
+                            {% else %}
+                            <span class="ui red horizontal label">Not visible</span>
+
+                            <a href="{{url_for('admin.api_set_visible', uid=g.info.id)}}">
+                                <i class="eye icon"></i>Unhide
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div>
+        <table class="ui single line table">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Submit time</th>
+                    <th>Flag</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in g.latest_submits %}
+                <tr>
+                    <div style="display: none">#{{s.task_id}}</div>
+                    <td><a href="{{url_for('problem.show_problem_detail', pid=s.problem_id)}}">{{s.title}}</a><span class="ui grey text"> - Task {{s.task_order}}</span></td>
+                    <td>{{s.submit_time}}</td>
+                    <td>
+                        {% if s.is_accepted%}
+                        <i class="green check icon"></i>
+                        {% else %}
+                        <i class="red times icon"></i>
+                        {% endif %}
+                        {{s.flag}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+{% endblock %}

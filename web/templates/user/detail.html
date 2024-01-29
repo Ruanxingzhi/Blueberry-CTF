@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% set nav = '' %}
+
+{% block basic %}
+
+{% set u = g.info %}
+
+<div class="ui container">
+    <div class="ui grid">
+        <div class="ui row">
+            <div class="four wide column">
+                <div class="ui card">
+                    <div class="image">
+                        <img src="{{avatar_url(u, 512)}}" alt="avatar">
+                    </div>
+                    <div class="content">
+                        <div class="header">{{u.username}}</div>
+                        <div class="meta">
+                            <span class="date">Joined on {{u.register_time}}</span>
+                        </div>
+                        <div class="description">
+                            
+                        </div>
+                    </div>
+                    <div class="extra content">
+                        <div>
+                            <i class="tasks icon"></i>
+                            {{g.solve_cnt}} tasks solved
+                        </div>
+                        <div>
+                            <i class="gg icon"></i>
+                            {{g.total_point}} points
+                        </div>
+                        {% if g.is_admin %}
+                        <div>
+                            <i class="blue tools icon"></i>
+                            <a href="{{url_for('admin.show_user_detail', uid=u.id)}}" class="ui blue text">User detail</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="twelve wide column">
+                <h3># Accepted submits</h3>
+                <div class="ui divider hidden"></div>
+
+                <table class="ui fixed very basic single line table">
+                    <thead>
+                        <tr>
+                            <th class="three wide">Task</th>
+                            <th class="two wide">Points</th>
+                            <th class="four wide">Submit time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in g.solves %}
+                        <tr>
+                            <div style="display: none">#{{s.task_id}}</div>
+                            <td><a href="{{url_for('problem.show_problem_detail', pid=s.problem_id)}}">{{s.title}}</a><span class="ui grey text"> - Task {{s.task_order}}</span></td>
+                            <td>{{s.point}}</td>
+                            <td>{{s.submit_time}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

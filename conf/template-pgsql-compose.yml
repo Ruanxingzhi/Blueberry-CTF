@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgsql_data/:/var/lib/postgresql/data/
+    environment:
+      - TZ=Asia/Shanghai
+      - PGTZ=Asia/Shanghai
+      - POSTGRES_PASSWORD=$PGSQL_PASSWORD$
+      - POSTGRES_DB=blueberry
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 5433:8080
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 5434:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=ctf@hit.edu.cn
+      - PGADMIN_DEFAULT_PASSWORD=$PGSQL_PASSWORD$

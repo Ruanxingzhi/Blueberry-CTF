@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% set nav = '' %}
+
+{% block basic %}
+
+<div class="ui text container">
+    <h2 class="ui header">
+        # Login
+    </h2>
+    <form class="ui form" method="post" id="loginform">
+        <div class="field">
+            <label>Username</label>
+            <input type="text" id="username" name="username" placeholder="">
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" id="password" name="password">
+        </div>
+
+        <button class="ui button" type="submit">Submit</button>
+
+        <p>Have no account? <a href="{{url_for('user.show_register')}}">Register <i class="external link icon"></i></a></p>
+    </form>
+
+    <script>
+        $('#loginform')
+            .form({
+                fields: {
+                    username: 'empty',
+                    password: 'empty',
+                }
+            })
+            ;
+    </script>
+</div>
+
+
+{% endblock %}

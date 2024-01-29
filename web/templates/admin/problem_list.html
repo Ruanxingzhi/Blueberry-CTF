@@ -1,0 +1,56 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "problem" %}
+
+{% block body %}
+
+
+<div>
+    <table class="ui basic selectable table">
+        <thead>
+            <tr>
+                <th class="three wide">Title</th>
+                <th class="three wide">Tags</th>
+                <th class="two wide">Instance Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in g.problems %}
+            <tr onclick="window.location.href='{{url_for('admin.show_problem_detail', pid=p.id)}}'">
+                <td>
+                    {% if p.is_visible %}
+                    <i class="green eye icon"></i>
+                    {% else %}
+                    <i class="red eye slash icon"></i>
+                    {% endif %}
+
+                    <span style="color: lightgrey">A{{p.id}}. </span>{{p.title}}
+                </td>
+                <td>
+                    <span class="ui horizontal labels">
+                        {% for tag in p.tag_list %}
+                        <span class="ui mini label">{{tag}}</span>
+                        {% endfor %}
+                    </span>
+                </td>
+                <td>
+                    {{p.instance_type}}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="padding-top: 1em"></div>
+
+<div style="display: flex; justify-content: left;">
+    <div class="ui basic button" onclick="window.location.href = '{{url_for('admin.api_add_problem')}}'"><i class="add blue icon"></i>Add problem</div>
+</div>
+
+<div class="ui hidden divider"></div>
+<div class="ui hidden divider"></div>
+
+
+
+{% endblock %}

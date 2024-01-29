@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% set nav = '' %}
+
+{% block basic %}
+<div class="ui text container">
+    <h2 class="ui header">
+        # Profile
+    </h2>
+
+    <table class="ui very basic single line table">
+        <tbody>
+            <tr>
+                <td class="two wide">ID</td>
+                <td>{{g.user.id}}</td>
+            </tr>
+            <tr>
+                <td class="two wide">Username</td>
+                <td>{{g.user.username}}</td>
+            </tr>
+            <tr>
+                {% if config['USE_GRAVATAR'] == 'yes' %}
+                <td class="two wide"><a href="https://en.gravatar.com/">Gravatar</a></td>
+                {% else %}
+                <td class="two wide">Avatar</td>
+                {% endif %}
+                <td><img class="ui avatar image" src="{{avatar_url(g.user, 64)}}" alt="avatar"></td>
+            </tr>
+            <tr>
+                <td class="two wide">Email</td>
+                <td>{{g.user.email}}</td>
+            </tr>
+            <tr>
+                <td class="two wide">Registration</td>
+                <td>{{g.user.register_time}}</td>
+            </tr>
+
+            <tr>
+                <td class="two wide">Extra</td>
+                <td>{{g.user.extra_info}}</td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <h2 class="ui header">
+        # Modify password
+    </h2>
+
+    <form class="ui form" method="post" id="pwdform">
+        <div class="field">
+            <label>Current password</label>
+            <input type="password" name="originpassword">
+        </div>
+        <div class="field">
+            <label>New password</label>
+            <input type="password" name="newpassword" placeholder="At least 8 characters">
+        </div>
+        <div class="field">
+            <label>New password confirm</label>
+            <input type="password" name="newpassword2" placeholder="At least 8 characters">
+        </div>
+
+        <button class="ui button" type="submit">Submit</button>
+    </form>
+
+    <script>
+        $('#pwdform')
+            .form({
+                fields: {
+                    originpassword: 'empty',
+                    newpassword: 'minLength[8]',
+                    newpassword2: 'minLength[8]'
+                }
+            })
+            ;
+    </script>
+
+</div>
+{% endblock %}

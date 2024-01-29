@@ -1,0 +1,96 @@
+{% extends 'admin/adminbase.html' %}
+
+{% set menu_active = "board" %}
+
+{% block body %}
+
+<div class="ui segment">
+    <div class="ui list">
+        <div class="ui statistics">
+            <div class="statistic">
+                <div class="value">
+                    {{info.problem_num}}
+                </div>
+                <div class="label">
+                    <i class="book icon"></i>Problems
+                </div>
+            </div>
+            <div class="statistic">
+                <div class="value">
+                    {{info.task_num}}
+                </div>
+                <div class="label">
+                    <i class="tasks icon"></i>Tasks
+                </div>
+            </div>
+            <div class="statistic">
+                <div class="value">
+                    {{info.user_num}}
+                </div>
+                <div class="label">
+                    <i class="user icon"></i>Users
+                </div>
+            </div>
+            <div class="statistic">
+                <div class="value">
+                    {{info.submit_num}}
+                </div>
+                <div class="label">
+                    <i class="flag icon"></i>Submits
+                </div>
+            </div>
+            <div class="statistic">
+                <div class="value">
+                    {{info.solve_num}}
+                </div>
+                <div class="label">
+                    <i class="check icon"></i>Solves
+                </div>
+            </div>
+
+
+            
+        </div>
+
+
+    </div>
+
+</div>
+<div class="ui segment">
+
+    {% set cpu = psutil.cpu_percent(0.1) %}
+    <div class="ui teal progress" data-percent="{{ cpu }}">
+        <div class="bar">
+            <div class="progress"></div>
+        </div>
+        <div class="label">CPU {{cpu}}%</div>
+    </div>
+
+
+    {% set mem = psutil.virtual_memory() %}
+
+    <div class="ui yellow progress" data-percent="{{ mem.percent }}">
+        <div class="bar">
+            <div class="progress"></div>
+        </div>
+        <div class="label">Memory {{mem.used // 1024 // 1024}} MB / {{mem.total // 1024 // 1024}} MB</div>
+    </div>
+
+    {% set disk = psutil.disk_usage('/') %}
+
+    <div class="ui brown progress" data-percent="{{ disk.percent }}">
+        <div class="bar">
+            <div class="progress"></div>
+        </div>
+        <div class="label">Disk {{ disk.used // 1024 // 1024 // 1024}} GB / {{ disk.total // 1024 // 1024 // 1024}} GB</div>
+    </div>
+
+</div>
+
+<script>
+    $('.progress').progress();
+
+</script>
+
+
+{% endblock %}

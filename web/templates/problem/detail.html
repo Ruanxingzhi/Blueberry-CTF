@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% set nav = 'problems' %}
+
+{% block basic %}
+
+<div class="ui text container">
+    {% set p = g.detail %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="ui header" style="margin: 0"><span>{{'<span class="ui red text">[hidden] </span>' | safe if not p.is_visible}}{{p.title}}</span>
+                <div class="sub header">
+                    <div class="ui horizontal list">
+                        <div class="item">Problem ID: {{p.id}}</div>
+                        <div class="item">Solves:
+                            {% for t in g.solves %}
+                            {% if loop.index != 1 %} / {% endif %}
+                            <a onclick="javascript:show_solver('#solver-task-{{t[0]}}')">{{t[1]['cnt']}}</a>
+
+                            <div class="ui mini modal" id="solver-task-{{t[0]}}">
+                                <div class="header">
+                                    Solvers for task #{{loop.index}}
+                                </div>
+
+                                <div class="content">
+                                    <table class="ui very basic fixed table">
+                                        <tbody>
+                                            {% for u in t[1]['users'] %}
+                                            <tr>
+                                                <td class="two wide">
+                                                    <a
+                                                        onclick="window.location.href = '{{url_for('user.show_user_detail', uid=u.user_id)}}'">{{u.username}}</a>
+                                                </td>
+                                                <td class="three wide">{{u.submit_time}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            {% endfor %}
+                            <script>
+                                function show_solver(selector) {
+                                    $(selector).modal('show');
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </h1>
+
+            <div class="ui horizontal labels">
+                {% for tag in p.tag_list %}
+                <a class="ui label" href="/problem/#{{tag}}">{{tag}}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="ui tiny statistic">
+            <div class="value">{{g.solved_points}} / {{g.total_points}}</div>
+            <div class="label">Points</div>
+        </div>
+    </div>
+
+    <div class="ui divider" style="margin-bottom: 1.5rem;"></div>
+
+    <div>
+        <h3><i class="primary disabled paragraph icon"></i>Description</h3>
+        <div class="markd">{{p.description}}</div>
+    </div>
+
+    
+
+    {{g.solver_list}}
+
+    {% if g.files %}
+    <div class="ui divider hidden"></div>
+    <div>
+        <h3><i class="primary disabled paragraph icon"></i>Files</h3>
+        <div class="ui list">
+            {% for f in g.files%}
+            <div class="item">
+
+                <div class="content">
+                    <a href="{{url_for('file.send_file', key=f.download_key, filename=f.filename)}}"><i
+                            class="download icon"></i>{{f.filename}}</a>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if p.instance_type != 'none' %}
+    <div class="ui divider hidden"></div>
+    <div>
+        <h3><i class="primary disabled paragraph icon"></i>Instance</h3>
+        <div>
+            {% if p.instance_type == 'shared' %}
+            {% if g.instance %}
+            {{g.instance.connection_info | replace('platform_ip', request.host.split(":")[0])}}
+            {% else %}
+            <i class="red times icon"></i>Instance not launched, please contact admin.
+            {% endif %}
+
+            {% elif p.instance_type == 'private' %}
+            {% set is_show_launch = True %}
+            {% set is_show_destroy = False %}
+
+            {% if g.instance %}
+            <div class="ui list">
+                <script>
+                    function check_status(check_time = 1000) {
+                        setTimeout(async () => {
+                            try {
+                                let response = await fetch("/api/get_instance_status/{{p.id}}", { method: "POST" });
+                                if (response.status !== 200) {
+                                    throw response.status;
+                                }
+                                let data = await response.json();
+                                if (data.status !== "{{g.instance.status}}") {
+                                    location.reload();
+                                }
+                            } catch (e) {
+                                location.reload();
+                            }
+                            let next_time = check_time * 2;
+                            if (next_time > 20 * 1000) {
+                                next_time = 20 * 1000;
+                            }
+                            check_status(next_time);
+                        }, check_time)
+                    }
+                </script>
+                {% if g.instance.status == "pending" %}
+                {% set is_show_launch = False %}
+                <div class="item" style="text-align: center">
+                    <p><i class="notched grey circle loading icon"></i> Pending...</p>
+                </div>
+
+                <script>check_status();</script>
+                {% elif g.instance.status == "running" %}
+                {% set is_show_launch = False %}
+                {% if g.instance.end_time < g.warning_time %} <div class="item" style="text-align: center">
+                    <p><i class="notched grey circle loading icon"></i> Destroying...</p>
+            </div>
+
+            <script>check_status();</script>
+            {% else %}
+            {% set is_show_destroy = True %}
+            <div class="item">
+                <span class="ui primary text">{{g.instance.connection_info | replace('platform_ip', request.host.split(":")[0])}}</span>
+            </div>
+
+            <div class="item" style="padding-top: 1em">Valid before: {{g.instance.end_time}}</div>
+
+            <script>
+                const end_time = {{ g.instance.end_time.timestamp()}} * 1000;
+                let timedelta = Math.trunc(end_time - 10 * 1000 - new Date().getTime());
+                if (timedelta <= 0) {
+                    check_status();
+                } else {
+                    setTimeout(check_status, timedelta);
+                }
+            </script>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if is_show_launch %}
+        <button class="ui button" onclick="window.location.href = '{{url_for("api.launch_instance", pid=p.id)}}' ">Get an instance</button>
+        {% endif %}
+
+        {% if is_show_destroy %}
+        <button class=" ui button" onclick="window.location.href = '{{url_for("api.destroy_instance", pid=p.id)}}'">Destroy</button>
+        {% endif %}
+
+        {% endif %}
+    </div>
+</div>
+
+
+{% endif %}
+    <div class="ui divider" style="margin-top: 1.5rem;"></div>
+    <div class="taskinput">
+        {% for task in g.tasks %}
+        <form class="ui form" method="post" style="margin-bottom: 1rem;">
+            <input type="text" name="taskid" value="{{task.id}}" hidden>
+            
+            <div class="ui labeled fluid action input">
+                {% if g.tasks|length != 1 %}
+                <div class="ui label">
+                    Task #{{task.id_in_problem}} /
+                    <span class="ui black text">{{task.point}}p</span>
+                </div>
+                {% endif %}
+
+                {% if task.id not in g.accepted %}
+                <input type="text" name="flag" placeholder="flag{--------------------}" required>
+                <button class="ui primary button" type="submit">Submit</button>
+                {% else %}
+                    <input type="text" name="flag" placeholder="Accepted" style="background-color: honeydew; " disabled>
+                    {% if g.is_admin %}
+                    <div class="ui green button" onclick="window.location.href = '{{url_for('problem.reset_task_progress', pid=p.id, taskid=task.id)}}'">Reset</div>
+                    {% else %}
+                    <button class="ui disabled green button" type="submit">Submit</button>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

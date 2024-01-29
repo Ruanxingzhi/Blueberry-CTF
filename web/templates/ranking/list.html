@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% set nav = 'rankings' %}
+
+{% block basic %}
+<div class="ui text container">
+    <table class="ui fixed selectable unstackable single line compact table">
+        <thead>
+            <tr>
+                <th class="one wide">Place</th>
+                <th class="four wide">User</th>
+                <th class="two wide">Score</th>
+                <th class="four wide">Last submit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in g.list %}
+            <tr class="{{'left green marked' if g.user and g.user.id == u.id}}" onclick="goto_user_detail('{{u.id}}')">
+                <td>{{loop.index}}</td>
+                <td><img class="ui avatar rounded image" src="{{avatar_url(u, 64)}}" alt="avatar"> {{u.username}}</td>
+                <td>{{u.total_point}}</td>
+                <td>{{u.last_submit}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function goto_user_detail(uid) {
+        window.location.href = `/user/${uid}`;
+    }
+</script>
+
+{% endblock %}

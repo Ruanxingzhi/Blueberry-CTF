@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% set nav = '' %}
+
+{% block basic %}
+
+<div class="ui text container">
+    <h2 class="ui header">
+        # Register
+    </h2>
+    <form class="ui form" method="post" id="regform">
+        <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="">
+        </div>
+        <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="">
+        </div>
+        <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="At least 8 characters">
+        </div>
+        <div class="field">
+            <label>Password confirm</label>
+            <input type="password" name="password2" placeholder="At least 8 characters">
+        </div>
+
+        {% for x in g.extra %}
+        <div class="field">
+            <label>Extra: {{x}}</label>
+            <input type="text" name="{{x}}" placeholder="Only admin can see it, will not shown to public" required>
+        </div>
+        {% endfor %}
+
+        <button class="ui button" type="submit">Submit</button>
+
+    </form>
+
+    <script>
+        $('#regform')
+            .form({
+                fields: {
+                    email: 'empty',
+                    username: ['empty', 'maxLength[20]'],
+                    password: ['minLength[8]', 'maxLength[50]'],
+                    password2: ['minLength[8]', 'maxLength[50]'],
+                }
+            })
+            ;
+    </script>
+</div>
+
+
+
+{% endblock %}
