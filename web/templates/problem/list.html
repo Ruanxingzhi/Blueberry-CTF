@@ -13,7 +13,17 @@
 
 <div class="ui divider hidden"></div>
 
-
+<div class="head-tags ui container">
+    <div class="ui flex-center">
+        {% for tag in g.head_tags %}
+            <a class="ui large label basic primary" data-label="tag" onclick="set_tag('{{tag}}')">
+                {{tag}}
+                <div class="detail">{{g.tags_count[tag]}}</div>
+            </a>
+        {% endfor %}
+    </div>
+    <div class="ui divider hidden"></div>
+</div>
 
 <div class="ui container">
     <table class="ui basic selectable unstackable large table">

@@ -60,3 +60,14 @@ img {
 }
 
 .toast-container {}
+
+.flex-center {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    gap: 8px 6px;
+}
+
+.head-tags .ui.label.basic {
+    background: transparent !important;
+}

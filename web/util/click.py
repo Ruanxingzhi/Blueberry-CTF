@@ -256,6 +256,7 @@ def check(s):
                     ["userinfo_extra_fields", "[]"],
                     ["start_time", ""],
                     ["end_time", ""],
+                    ["head_tags", ""]
                 ],
             )
 

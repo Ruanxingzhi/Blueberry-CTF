@@ -103,7 +103,7 @@ def show_problem_detail(pid):
 
 @bp.post("/api/set_siteconfig")
 def api_set_siteconfig():
-    keys = ["site_name", "is_allow_register", "use_gravatar", "use_local_resources", "start_time", "end_time", "decay_lambda", "userinfo_extra_fields"]
+    keys = ["site_name", "is_allow_register", "use_gravatar", "use_local_resources", "start_time", "end_time", "decay_lambda", "userinfo_extra_fields", "head_tags"]
 
     config_items = [[request.form.get(key).strip(), key] for key in keys]
 
