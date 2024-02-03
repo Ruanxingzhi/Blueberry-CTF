@@ -41,7 +41,7 @@ SELECT r.*, solve_info FROM r LEFT JOIN solves ON r.id = solves.problem_id WHERE
         x['task_list'] = parse_tags(x.pop('tasks'))
 
     # 对所有题目的 tag 进行计数
-    all_tags = [ tag for x in g.problems for tag in x['tag_list'] ]
+    all_tags = [ tag.lower() for x in g.problems for tag in x['tag_list'] ]
     g.tags_count = collections.Counter(all_tags)
 
     # 获取 head_tags

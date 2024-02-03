@@ -16,9 +16,9 @@
 <div class="head-tags ui container">
     <div class="ui flex-center">
         {% for tag in g.head_tags %}
-            <a class="ui large label basic primary" data-label="tag" onclick="set_tag('{{tag}}')">
+            <a class="ui large label basic primary" data-label="tag" onclick="set_tag('{{tag.lower()}}')">
                 {{tag}}
-                <div class="detail">{{g.tags_count[tag]}}</div>
+                <div class="detail">{{g.tags_count[tag.lower()]}}</div>
             </a>
         {% endfor %}
     </div>
