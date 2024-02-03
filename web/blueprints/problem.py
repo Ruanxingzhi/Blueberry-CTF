@@ -5,6 +5,7 @@ from util.flag_check import check_flag
 from traceback import format_exc
 from util.wrapper import login_required, admin_required
 from datetime import datetime, timedelta
+import collections
 
 bp = Blueprint('problem', __name__, url_prefix='/problem')
 
@@ -38,6 +39,17 @@ SELECT r.*, solve_info FROM r LEFT JOIN solves ON r.id = solves.problem_id WHERE
     for x in g.problems:
         x['tag_list'] = parse_tags(x.pop('tag'))
         x['task_list'] = parse_tags(x.pop('tasks'))
+
+    # 对所有题目的 tag 进行计数
+    all_tags = [ tag.lower() for x in g.problems for tag in x['tag_list'] ]
+    g.tags_count = collections.Counter(all_tags)
+
+    # 获取 head_tags
+    with db_pool.connection() as conn:
+        dbres = conn.execute(
+            "SELECT config_value FROM site_config WHERE config_key = 'head_tags'"
+        ).fetchone()
+        g.head_tags = parse_tags(dbres["config_value"])
 
     return render_template('problem/list.html')
 
