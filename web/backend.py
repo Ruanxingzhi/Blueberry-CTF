@@ -40,26 +40,26 @@ def start_container(config, pid, uid):
 
     image_name = config["image"]
 
-    if "port" in config:
-        print("port from config:", config["port"])
-        exposed_port = config["port"]
-        config.pop("port")
+    if "ports" in config:
+        print("ports from config:", config["ports"])
+        exposed_port = config["ports"]
+        config.pop("ports")
     else:
         exposed_port = list(
             client.images.get(image_name)
             .attrs["ContainerConfig"]["ExposedPorts"]
             .keys()
-        )[0]
+        )
 
-    print(type(exposed_port))
-    public_port = get_port_from_pool()
+    print('ports:', exposed_port)
 
     # 尽管这里可以设置 {"exposed_port": 0} 来让 docker 自行选择端口
     # 但这种实现所暴露的公共端口范围为 32768-65535
     # 考虑到现实中常常需要进行范围端口转发，这会占用公网 vps 一半的端口数量
     # 且此种实现也使得「内网 A、B 机器各开一个 blueberry，转发到外网 C 机器」不可行
     # 故我们在此选择手动分配 public_port
-    config["ports"] = {exposed_port: public_port}
+    port_map = {p: get_port_from_pool() for p in exposed_port}
+    config["ports"] = port_map
 
     # 默认 cpu 限制：0.25 个核
     if 'cpu_quota' not in config:
@@ -74,10 +74,10 @@ def start_container(config, pid, uid):
     c = client.containers.run(**config)
     c.reload()
 
-    real_port = c.ports[exposed_port][0]["HostPort"]
-    assert int(real_port) == public_port
+    # real_port = c.ports[exposed_port][0]["HostPort"]
+    # assert int(real_port) == public_port
 
-    remote = f"platform_ip:{public_port}"
+    remote = ' , '.join(f"platform_ip:{p}" for p in port_map.values())
     print("remote", remote)
 
     return remote
