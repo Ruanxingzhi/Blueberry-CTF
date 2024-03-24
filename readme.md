@@ -68,6 +68,12 @@ gunicorn app:app
 
 Now Blueberry platform is avaliable on port 80.
 
+Build the demo challenge `runma`:
+```
+cd problems/runma
+docker-compose build
+```
+
 Start the container manager:
 ```bash
 # use tmux!
