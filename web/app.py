@@ -39,7 +39,7 @@ def avatar_processor():
     def avatar_url(user, size):
         if app.config["USE_GRAVATAR"] == "yes":
             hash_hex = md5(user["email"].lower().encode()).hexdigest()
-            return f"https://sdn.geekzu.org/avatar/{hash_hex}?s={size}&d=identicon"
+            return f"https://cravatar.cn/avatar/{hash_hex}?s={size}&d=identicon"
         else:
             return "/static/img/anonymous.png"
 
