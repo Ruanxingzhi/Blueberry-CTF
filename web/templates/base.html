@@ -43,7 +43,7 @@
 
     <script>
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            $(".ui:not(.hidden)").addClass("inverted");
+            $(".ui:not(.hidden, .no-invert)").addClass("inverted");
         }
         $('.outer').show();
 
