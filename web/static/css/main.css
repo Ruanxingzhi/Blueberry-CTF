@@ -30,6 +30,37 @@
         color: #000;
         background: #909090;
     }
+
+    .ui.inverted.form input[type="text"] {
+        color: #fff;
+        background: #4d5057;
+        border-color: rgba(255,255,255,.2);
+        border-width: 2px;
+        border-right: none;
+    }
+
+    .ui.inverted.input > input {
+        color: #fff;
+        background: #4d5057;
+        border: 2px solid rgba(255,255,255,.2);
+        border-right: none;
+    }
+
+    .ui.inverted.input > input#search {
+        color: #fff;
+        background: #4d5057;
+        border: 1px solid rgba(255,255,255,.2);
+    }
+
+    .ui.action.input:not([class*="left action"]) > input::selection {
+        color: white;
+        background-color: #00B5AD;
+    }
+
+    :is(.ui.inverted.form input[type="text"], .ui.inverted.input > input#search)::selection {
+        color: white;
+        background-color: #54C8FF;
+    }
 }
 
 .outer {

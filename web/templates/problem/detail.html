@@ -144,18 +144,29 @@
                 <script>check_status();</script>
                 {% elif g.instance.status == "running" %}
                 {% set is_show_launch = False %}
-                {% if g.instance.end_time < g.warning_time %} <div class="item" style="text-align: center">
+                {% if g.instance.end_time < g.warning_time %}
+                <div class="item" style="text-align: center">
                     <p><i class="notched grey circle loading icon"></i> Destroying...</p>
-            </div>
+                </div>
 
             <script>check_status();</script>
             {% else %}
             {% set is_show_destroy = True %}
-            <div class="item">
-                <span class="ui primary text">{{g.instance.connection_info | replace('platform_ip', request.host.split(":")[0])}}</span>
+            {% set target = g.instance.connection_info | replace('platform_ip', request.host.split(":")[0]) %}
+            <div class="ui action input fluid">
+                <input id="instance_input" type="text" value="{{target}}" style="font-weight: bold;" readonly />
+                <button class="ui teal right icon button no-invert" data-tooltip="Copy to Clipboard" onclick="copyToClipboard()">
+                    <i class="copy icon"></i>
+                </button>
+                <a class="ui teal right icon button no-invert" data-tooltip="Open in New Tab" href="http://{{target}}" target="_blank">
+                    <i class="external alternate icon"></i>
+                </a>
             </div>
 
-            <div class="item" style="padding-top: 1em">Valid before: {{g.instance.end_time}}</div>
+            <div class="ui indicating tiny progress" id="instance_progress">
+                <div class="bar"></div>
+                <div class="label" style="color: white;"></div>
+            </div>
 
             <script>
                 const end_time = {{ g.instance.end_time.timestamp()}} * 1000;
@@ -164,6 +175,38 @@
                     check_status();
                 } else {
                     setTimeout(check_status, timedelta);
+                }
+
+                function formatTime(time) {
+                    let seconds = Math.floor(time / 1000)
+                    let hours = Math.floor(seconds / 3600)
+                    seconds %= 3600
+                    let minutes = Math.floor(seconds / 60)
+                    seconds %= 60
+                    const pad = (n) => Math.max(n, 0).toString().padStart(2, '0')
+                    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+                }
+
+                function updateTimeProgress() {
+                    const now_time = new Date().getTime()
+                    const total_time = 60 * 60 * 1000   // instance lives for an hour by default
+                    const percent = Math.ceil( (end_time - now_time) / total_time * 100)
+                    
+                    $("#instance_progress")
+                        .progress({ percent })
+
+                    $("#instance_progress .label")
+                        .text("Valid: " + formatTime(end_time - now_time))
+                }
+                updateTimeProgress()
+                setInterval(updateTimeProgress, 1000)
+
+                function copyToClipboard() {
+                    {# For security considerations, `Clipboard API` is only available in localhost & HTTPS environment, however, it is likely that Blueberry is running in an HTTP environment. Therefore we have to use `document.execCommand` here instead, despite MDN has marked it as *deprecated*. #}
+                    const inputElement = document.querySelector("#instance_input")
+                    inputElement.select()
+                    document.execCommand('copy')
+                    alert("Successfully copied to clipboard!")
                 }
             </script>
             {% endif %}
