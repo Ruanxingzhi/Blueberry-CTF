@@ -6,6 +6,8 @@ from util.refresh_config import refresh_config
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = env("SECRET_KEY")
+app.config["SESSION_COOKIE_NAME"] = 'session_blueberry'
+
 
 with app.app_context():
     try:
