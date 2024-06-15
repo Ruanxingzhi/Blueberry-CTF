@@ -7,7 +7,7 @@
 <div class="ui text container">
     <div class="ui fluid tiny icon input">
         <input type="text" placeholder="Search..." id="search">
-        <i class="search icon"></i>
+        <i class="ui search icon"></i>
     </div>
 </div>
 
@@ -84,6 +84,9 @@ function do_search() {
     const query_str = $('#search').val();
     window.location.hash = query_str;
     const query = query_str.toLowerCase();
+
+    if (query !== "") $('#search').addClass("active")
+    if (query === "") $('#search').removeClass("active")
 
     for(let row of table.children()) {
         const title = $(row).find('[data-label=title]').text();

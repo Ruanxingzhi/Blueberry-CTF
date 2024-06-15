@@ -1,4 +1,14 @@
+:root {
+    --text-color: black;
+    --highlight-blue: #85b7d9;
+}
+
 @media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: white;
+        --dark-bg-dimmed: #4d5057;
+    }
+
     body {
         background: #2d2f33;
         color: #fff;
@@ -31,34 +41,54 @@
         background: #909090;
     }
 
-    .ui.inverted.form input[type="text"] {
-        color: #fff;
-        background: #4d5057;
+    .ui.inverted.form input:is([type="text"], [type="password"], [type="email"]),
+    .ui.inverted.form textarea {
+        color: var(--text-color);
+        background: var(--dark-bg-dimmed);
         border-color: rgba(255,255,255,.2);
         border-width: 2px;
-        border-right: none;
+    }
+
+    .ui.inverted.form input:is([type="text"], [type="password"], [type="email"]):focus,
+    .ui.inverted.form textarea:focus,
+    .ui.inverted.input > input#search:focus {
+        border-color: var(--highlight-blue);
+    }
+
+    /* Previous selector would overwrite the `border-right-color: transparent;` in dark mode. */
+    /* So we reset it here. */
+    .ui.inverted.action.input:not([class*="left action"]) > input {
+        border-right-color: transparent;
+    }
+
+    .ui.inverted.action.input:not([class*="left action"]) > input:focus {
+        border-color: var(--highlight-blue);
     }
 
     .ui.inverted.input > input {
-        color: #fff;
-        background: #4d5057;
+        color: var(--text-color);
+        background: var(--dark-bg-dimmed);
         border: 2px solid rgba(255,255,255,.2);
-        border-right: none;
     }
 
     .ui.inverted.input > input#search {
-        color: #fff;
-        background: #4d5057;
-        border: 1px solid rgba(255,255,255,.2);
+        color: var(--text-color);
+        background: var(--dark-bg-dimmed);
+        border: 1px solid rgba(255,255,255,.2); /* use 1px border in search bar */
+                                                  /* makes it visually better */
     }
 
     .ui.action.input:not([class*="left action"]) > input::selection {
-        color: white;
+        color: var(--text-color);
         background-color: #00B5AD;
     }
 
-    :is(.ui.inverted.form input[type="text"], .ui.inverted.input > input#search)::selection {
-        color: white;
+    :is(
+        .ui.inverted.form input:is([type="text"], [type="password"], [type="email"]),
+        .ui.inverted.form textarea,
+        .ui.inverted.input > input#search
+    )::selection {
+        color: var(--text-color);
         background-color: #54C8FF;
     }
 }
@@ -101,4 +131,9 @@ img {
 
 .head-tags .ui.label.basic {
     background: transparent !important;
+}
+
+.ui.input > input#search.active {
+    outline: 2.5px solid var(--highlight-blue);
+    outline-offset: -1px;
 }
