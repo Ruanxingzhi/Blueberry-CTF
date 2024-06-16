@@ -116,7 +116,7 @@ def init():
 
         if name.startswith("blueberry-ctf-prob-"):
             print(f"[red]- destroy {name}[/red]")
-            c.remove(force=True)
+            c.remove(v=True, force=True)
 
     with db_pool.connection() as conn:
         conn.execute(
