@@ -1,9 +1,22 @@
 from hmac import HMAC
+from Cryptodome.Cipher import AES
+import struct
 import os
+
+def gen_flag(key, tid, uid):
+    engine = AES.new(key, AES.MODE_ECB)
+    plaintext = b'BerryCTF' + struct.pack('II', uid, tid)
+    ciphertext = engine.encrypt(plaintext)
+
+    return 'flag{' + ciphertext.hex() + '}'
 
 def check_flag(checker, flag, info={}):
     scope = info.copy()
-    scope['dynamic_flag'] = 'flag{' + HMAC(os.getenv('FLAG_HMAC_KEY').encode(), f"{info['task_id']}|{info['user_id']}".encode(), 'md5').hexdigest() + '}'
+    scope['dynamic_flag'] = gen_flag(
+        os.getenv('FLAG_GEN_KEY').encode(), 
+        info['task_id'], 
+        info['user_id']
+    )
 
     exec(checker, scope)
     res = scope['check'](flag)

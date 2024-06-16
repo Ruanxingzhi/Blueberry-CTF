@@ -9,6 +9,8 @@ from time import sleep
 from hmac import HMAC
 from rich import print
 from random import shuffle
+from Cryptodome.Cipher import AES
+import struct
 
 dotenv.load_dotenv()
 
@@ -97,15 +99,12 @@ def start_shared_instance(pid):
             [pid, remote],
         )
 
+def gen_flag(tid, uid):
+    engine = AES.new(os.getenv("FLAG_GEN_KEY").encode(), AES.MODE_ECB)
+    plaintext = b'BerryCTF' + struct.pack('II', uid, tid)
+    ciphertext = engine.encrypt(plaintext)
 
-def gen_flag(task_id, uid):
-    return (
-        "flag{"
-        + HMAC(
-            os.getenv("FLAG_HMAC_KEY").encode(), f"{task_id}|{uid}".encode(), "md5"
-        ).hexdigest()
-        + "}"
-    )
+    return 'flag{' + ciphertext.hex() + '}'
 
 
 def init():

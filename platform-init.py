@@ -22,7 +22,7 @@ time.sleep(10)
 env = open(os.path.join('conf', 'template.env')).read()
 env = env.replace('$PGSQL_PASSWORD$', pgsql_passwd)
 env = env.replace('$SECRET_KEY$', secrets.token_urlsafe(16))
-env = env.replace('$FLAG_HMAC_KEY$', secrets.token_urlsafe(16))
+env = env.replace('$FLAG_GEN_KEY$', secrets.token_hex(16))
 open(os.path.join('web', '.env'), 'w').write(env)
 
 os.chdir('web')
