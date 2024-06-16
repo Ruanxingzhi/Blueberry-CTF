@@ -256,7 +256,8 @@ def check(s):
                     ["userinfo_extra_fields", "[]"],
                     ["start_time", ""],
                     ["end_time", ""],
-                    ["head_tags", ""]
+                    ["head_tags", ""],
+                    ["player_max_container_num", "4"]
                 ],
             )
 

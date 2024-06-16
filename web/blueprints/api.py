@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, g, url_for, redirect, flash
+from flask import Blueprint, abort, g, url_for, redirect, flash, current_app
 from util.db import db_pool
 from util.wrapper import login_required
 
@@ -16,6 +16,12 @@ def launch_instance(pid):
     with db_pool.connection() as conn:
         problem_info = conn.execute('SELECT * FROM problem WHERE id = %s', [pid]).fetchone()
         latest_info = conn.execute('SELECT * FROM instance WHERE user_id = %s AND problem_id = %s ORDER BY request_time DESC LIMIT 1', [uid, pid]).fetchone()
+        user_current_container_count = conn.execute("SELECT COUNT(*) as cnt FROM instance WHERE user_id = %s AND status = 'running'", [uid]).fetchone()['cnt']
+
+    container_limit = int(current_app.config['PLAYER_MAX_CONTAINER_NUM'])
+    if user_current_container_count >= container_limit:
+        flash(f'You can only have {container_limit} running containers.', 'warning')
+        return redirect(url_for('problem.show_problem_detail', pid=pid))
 
     if not problem_info:
         abort(418)

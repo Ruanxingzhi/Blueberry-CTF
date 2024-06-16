@@ -101,13 +101,18 @@
             </script>
 
             <div class="field">
-                <label>Decay lambda, please set it to 0.2 * (estimated number of players)</label>
+                <label>Decay lambda, for every λ people who complete this task, the score is halved. (minimum: 25% base point)</label>
                 <input type="text" name="decay_lambda" value="{{site_config['decay_lambda']}}">
             </div>
 
             <div class="field">
                 <label>User info extra fields (json list)</label>
                 <input type="text" name="userinfo_extra_fields" value="{{site_config['userinfo_extra_fields']}}">
+            </div>
+
+            <div class="field">
+                <label>User info extra fields (json list)</label>
+                <input type="text" name="player_max_container_num" value="{{site_config['player_max_container_num']}}">
             </div>
 
             <button class="ui button labeled icon" type="submit"><i class="pen icon"></i>Update</button>

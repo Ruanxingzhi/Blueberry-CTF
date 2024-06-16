@@ -54,7 +54,12 @@
                 <td>{{x.total_point or ''}}</td>
 
                 <td>
-                    <span class="ui text" data-label="title"><span style="color: lightgrey">A{{x.id}}. </span>{{'<span class="ui red text">[hidden] </span>' | safe if not x.is_visible}}{{x.title}}</span>
+                    <span class="ui text" data-label="title">
+                        <span style="color: lightgrey">A{{x.id}}. </span>
+                        {{'<span class="ui red text">[hidden] </span>' | safe if not x.is_visible}}
+                        {{x.title}}
+                        {{'<i class="ui primary docker icon"></i>' | safe if x.id in g.running_problems }}
+                    </span>
                 </td>
                 
                 <td data-label="tags">

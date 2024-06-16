@@ -33,6 +33,8 @@ SELECT r.*, solve_info FROM r LEFT JOIN solves ON r.id = solves.problem_id WHERE
 ''', [g.is_admin]).fetchall())
         g.accepted = list(conn.execute(
             'SELECT task_id FROM accepted_submit WHERE user_id = %s', [g.user['id']]).fetchall())
+        g.running_problems = list(conn.execute("SELECT problem_id FROM instance WHERE user_id = %s AND status = 'running'", [g.user['id']]).fetchall())
+        g.running_problems = [x['problem_id'] for x in g.running_problems]
 
     g.accepted = [str(x['task_id']) for x in g.accepted]
 
