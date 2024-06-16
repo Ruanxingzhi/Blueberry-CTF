@@ -170,7 +170,7 @@ def handle_launch_request():
         else:
             with db_pool.connection() as conn:
                 conn.execute(
-                    "UPDATE instance SET status = 'running', connection_info = %s, start_time=current_timestamp(0), end_time=current_timestamp(0) + interval '1 hours' WHERE id = %s",
+                    "UPDATE instance SET status = 'running', connection_info = %s, start_time=current_timestamp(0), end_time=current_timestamp(0) + interval '2 hours' WHERE id = %s",
                     [remote, r["id"]],
                 )
 

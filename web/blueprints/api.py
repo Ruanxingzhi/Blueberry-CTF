@@ -71,3 +71,18 @@ def get_instance_status(pid):
         abort(418)
 
     return {"status": latest_info["status"]}
+
+@bp.route('/extend_instance_time/<int:pid>', methods = ["GET"])
+def extend_instance_time(pid):
+    uid = g.user['id']
+
+    with db_pool.connection() as conn:
+        instance_id = conn.execute("SELECT id FROM instance WHERE user_id = %s AND problem_id = %s AND status = 'running'", [uid, pid]).fetchone()['id']
+
+    if not instance_id:
+        abort(418)
+
+    with db_pool.connection() as conn:
+        conn.execute("UPDATE instance SET end_time = end_time + INTERVAL '1 hour' WHERE id = %s", [instance_id])
+
+    return redirect(url_for('problem.show_problem_detail', pid=pid))

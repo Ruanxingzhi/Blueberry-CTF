@@ -165,7 +165,7 @@
 
             <div class="ui indicating tiny progress" id="instance_progress">
                 <div class="bar"></div>
-                <div class="label" style="color: var(--text-color);"></div>
+                <div class="label" style="color: var(--text-color); font-family: monospace;"></div>
             </div>
 
             <script>
@@ -196,7 +196,7 @@
                         .progress({ percent })
 
                     $("#instance_progress .label")
-                        .text("Valid: " + formatTime(end_time - now_time))
+                        .html("Valid: " + formatTime(end_time - now_time) + ' <a class="ui link" href="{{url_for('api.extend_instance_time', pid=p.id)}}"> [+1h!]</a>')
                 }
                 updateTimeProgress()
                 setInterval(updateTimeProgress, 1000)
