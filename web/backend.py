@@ -199,7 +199,7 @@ def destroy_outdated():
                 free_port = x[0]["HostPort"]
                 put_port_to_pool(free_port)
 
-        c.remove(force=True)
+        c.remove(v=True, force=True)
 
         with db_pool.connection() as conn:
             conn.execute(
