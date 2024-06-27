@@ -4,15 +4,17 @@ from psycopg.rows import dict_row
 import dotenv
 import os
 import json
+import hashlib
 from traceback import format_exc
 from time import sleep
-from hmac import HMAC
 from rich import print
 from random import shuffle
 from Cryptodome.Cipher import AES
 import struct
 
 dotenv.load_dotenv()
+
+container_name_prefix = 'bbctf-' + hashlib.md5(os.getenv("PGSQL_URI").encode()).hexdigest()[:10]
 
 db_pool = ConnectionPool(
     os.getenv("PGSQL_URI"), min_size=1, kwargs={"row_factory": dict_row}
@@ -36,7 +38,7 @@ def put_port_to_pool(p):
 
 
 def start_container(config, pid, uid):
-    config["name"] = f"blueberry-ctf-prob-{pid}-{uid}"
+    config["name"] = f"{container_name_prefix}-u{uid}-p{pid}"
     # config['publish_all_ports'] = True
     config["detach"] = True
 
@@ -46,6 +48,10 @@ def start_container(config, pid, uid):
         print("ports from config:", config["ports"])
         exposed_port = config["ports"]
         config.pop("ports")
+    elif "port" in config:
+        print("port from config:", config["port"])
+        exposed_port = [config["port"]]
+        config.pop("port")
     else:
         exposed_port = list(
             client.images.get(image_name)
@@ -113,7 +119,7 @@ def init():
     for c in c_list:
         name = c.name
 
-        if name.startswith("blueberry-ctf-prob-"):
+        if name.startswith(container_name_prefix):
             print(f"[red]- destroy {name}[/red]")
             c.remove(v=True, force=True)
 
@@ -187,7 +193,7 @@ def destroy_outdated():
         pid = r["problem_id"]
         uid = r["user_id"]
 
-        name = f"blueberry-ctf-prob-{pid}-{uid}"
+        name = f"{container_name_prefix}-u{uid}-p{pid}"
         print(f"[red]- destroy {name}[/red]")
 
         c = client.containers.get(name)
