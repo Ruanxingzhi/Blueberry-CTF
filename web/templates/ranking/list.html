@@ -17,7 +17,7 @@
             {% for u in g.list %}
             <tr class="{{'left green marked' if g.user and g.user.id == u.id}}" onclick="goto_user_detail('{{u.id}}')">
                 <td>{{loop.index}}</td>
-                <td><img class="ui avatar rounded image" src="{{avatar_url(u, 64)}}" alt="avatar"> {{u.username}}</td>
+                <td><img loading="lazy" class="ui avatar rounded image" src="{{avatar_url(u, 64)}}" alt="avatar"> {{u.username}}</td>
                 <td>{{u.total_point}}</td>
                 <td>{{u.last_submit}}</td>
             </tr>
