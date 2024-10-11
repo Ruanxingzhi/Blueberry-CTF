@@ -133,7 +133,7 @@ def show_problem_detail(pid):
             abort(403)
 
         g.tasks = list(conn.execute(
-            'SELECT id, point FROM view_task_score WHERE problem_id = %s', [pid]).fetchall())
+            'SELECT id, point FROM view_task_score WHERE problem_id = %s ORDER BY id', [pid]).fetchall())
         g.accepted = list(conn.execute('SELECT task_id FROM accepted_submit WHERE user_id = %s', [
                           g.user['id']]).fetchall())
         
