@@ -206,7 +206,7 @@
                     const inputElement = document.querySelector("#instance_input")
                     inputElement.select()
                     document.execCommand('copy')
-                    alert("Successfully copied to clipboard!")
+                    $.toast({ class: "success", title: "Copied", showProgress: "button", message: "Successfully copied to clipboard!"})
                 }
             </script>
             {% endif %}
