@@ -21,7 +21,7 @@ Latest Debian is recommended.
 Install requirements:
 
 ```bash
-apt install nginx docker-compose tmux
+apt install nginx docker compose tmux
 apt install python3 python3-dotenv python3-flask python3-psycopg-pool python3-passlib python3-psutil python3-gevent python3-rich python3-pycryptodome gunicorn
 ```
 
@@ -71,7 +71,7 @@ Now Blueberry platform is avaliable on port 80.
 Build the demo challenge `runma`:
 ```
 cd problems/runma
-docker-compose build
+docker compose build
 ```
 
 Start the container manager:

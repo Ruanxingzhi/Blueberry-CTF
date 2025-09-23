@@ -14,7 +14,9 @@ import struct
 
 dotenv.load_dotenv()
 
-container_name_prefix = 'bbctf-' + hashlib.md5(os.getenv("PGSQL_URI").encode()).hexdigest()[:10]
+container_name_prefix = (
+    "bbctf-" + hashlib.md5(os.getenv("PGSQL_URI").encode()).hexdigest()[:10]
+)
 
 db_pool = ConnectionPool(
     os.getenv("PGSQL_URI"), min_size=1, kwargs={"row_factory": dict_row}
@@ -54,12 +56,17 @@ def start_container(config, pid, uid):
         config.pop("port")
     else:
         exposed_port = list(
-            client.images.get(image_name)
-            .attrs["ContainerConfig"]["ExposedPorts"]
-            .keys()
+            (
+                client.images.get(image_name)
+                .attrs.get(
+                    "ContainerConfig", client.images.get(image_name).attrs.get("Config")
+                )
+                .get("ExposedPorts")
+                .keys()
+            )
         )
 
-    print('ports:', exposed_port)
+    print("ports:", exposed_port)
 
     # 尽管这里可以设置 {"exposed_port": 0} 来让 docker 自行选择端口
     # 但这种实现所暴露的公共端口范围为 32768-65535
@@ -70,9 +77,9 @@ def start_container(config, pid, uid):
     config["ports"] = port_map
 
     # 默认 cpu 限制：0.25 个核
-    if 'cpu_quota' not in config:
+    if "cpu_quota" not in config:
         config["cpu_quota"] = 25000
-    if 'cpu_period' not in config:
+    if "cpu_period" not in config:
         config["cpu_period"] = 100000
 
     print(f'[green]+ create {config["name"]}[/green]')
@@ -85,7 +92,7 @@ def start_container(config, pid, uid):
     # real_port = c.ports[exposed_port][0]["HostPort"]
     # assert int(real_port) == public_port
 
-    remote = ' , '.join(f"platform_ip:{p}" for p in port_map.values())
+    remote = " , ".join(f"platform_ip:{p}" for p in port_map.values())
     print("remote", remote)
 
     return remote
@@ -105,12 +112,13 @@ def start_shared_instance(pid):
             [pid, remote],
         )
 
+
 def gen_flag(tid, uid):
     engine = AES.new(os.getenv("FLAG_GEN_KEY").encode(), AES.MODE_ECB)
-    plaintext = b'BerryCTF' + struct.pack('II', uid, tid)
+    plaintext = b"BerryCTF" + struct.pack("II", uid, tid)
     ciphertext = engine.encrypt(plaintext)
 
-    return 'flag{' + ciphertext.hex() + '}'
+    return "flag{" + ciphertext.hex() + "}"
 
 
 def init():
