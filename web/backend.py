@@ -53,10 +53,12 @@ def start_container(config, pid, uid):
         exposed_port = [config["port"]]
         config.pop("port")
     else:
+        img = client.images.get(image_name)
         exposed_port = list(
-            client.images.get(image_name)
-            .attrs["ContainerConfig"]["ExposedPorts"]
-            .keys()
+            img.attrs
+              .get("ContainerConfig", img.attrs.get("Config"))
+              .get("ExposedPorts")
+              .keys()
         )
 
     print('ports:', exposed_port)
