@@ -80,7 +80,7 @@ def show_register():
         if is_allow != 'yes':
             abort(403)
 
-    g.extra = json.loads(conn.execute("SELECT config_value FROM site_config WHERE config_key = 'userinfo_extra_fields'").fetchone()['config_value'])
+        g.extra = json.loads(conn.execute("SELECT config_value FROM site_config WHERE config_key = 'userinfo_extra_fields'").fetchone()['config_value'])
 
     if request.method == 'GET':
         return render_template('user/register.html')
