@@ -50,7 +50,7 @@ services:
       retries: 30
       start_period: 40s
 
-  backend:
+  instance_manager:
     build: ./instance-manager
     restart: unless-stopped
     depends_on:

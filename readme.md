@@ -18,7 +18,7 @@ Intro: [Blueberry CTF 的设计、实现和反思](https://www.ruanx.net/blueber
 
 ```bash
 python3 env-gen.py
-docker compose up
+docker compose up -d
 ```
 
 Blueberry must run behind a reverse proxy. For nginx:
