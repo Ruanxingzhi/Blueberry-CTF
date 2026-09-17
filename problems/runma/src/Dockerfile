@@ -1,5 +1,7 @@
 FROM php:8-apache-buster
 
+EXPOSE 80
+
 COPY app /var/www/html
 
 RUN chown root /var/www/html

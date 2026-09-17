@@ -1,3 +1,6 @@
 __pycache__
 .DS_Store
 .vscode
+.env
+web/upload/
+pgsql_data/

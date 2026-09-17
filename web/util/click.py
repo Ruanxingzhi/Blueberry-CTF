@@ -2,24 +2,26 @@ from util.db import db_pool
 import click
 from passlib.hash import bcrypt_sha256
 import os
-import secrets
 
 from rich import print
 
-def do_erase_db():
-    print("Erase database...")
+def _drop_schema(conn):
+    conn.execute("DROP VIEW IF EXISTS view_user_solve")
+    conn.execute("DROP VIEW IF EXISTS view_task_score")
+    conn.execute("DROP VIEW IF EXISTS view_task_solve_cnt")
+    conn.execute("DROP VIEW IF EXISTS view_task_in_problem")
+    conn.execute("DROP TABLE IF EXISTS problem")
+    conn.execute("DROP TABLE IF EXISTS task")
+    conn.execute("DROP TABLE IF EXISTS user_info")
+    conn.execute("DROP TABLE IF EXISTS log_flag")
+    conn.execute("DROP TABLE IF EXISTS accepted_submit")
+    conn.execute("DROP TABLE IF EXISTS file")
+    conn.execute("DROP TABLE IF EXISTS instance")
+    conn.execute("DROP TABLE IF EXISTS site_config")
 
-    os.makedirs("upload", exist_ok=True)
-    os.system("rm -f upload/*")
 
-    with db_pool.connection() as conn:
-        conn.execute("DROP VIEW IF EXISTS view_user_solve")
-        conn.execute("DROP VIEW IF EXISTS view_task_score")
-        conn.execute("DROP VIEW IF EXISTS view_task_solve_cnt")
-        conn.execute("DROP VIEW IF EXISTS view_task_in_problem")
-
-        conn.execute("DROP TABLE IF EXISTS problem")
-        conn.execute(
+def _create_schema(conn):
+    conn.execute(
             """
 CREATE TABLE problem (
     id serial primary key,
@@ -32,8 +34,7 @@ CREATE TABLE problem (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS task")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE task (
     id serial primary key,
@@ -44,8 +45,7 @@ CREATE TABLE task (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS user_info")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE user_info (
     id serial primary key,
@@ -59,8 +59,7 @@ CREATE TABLE user_info (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS log_flag")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE log_flag (
     id serial primary key,
@@ -73,8 +72,7 @@ CREATE TABLE log_flag (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS accepted_submit")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE accepted_submit (
     id serial primary key,
@@ -87,8 +85,7 @@ CREATE TABLE accepted_submit (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS file")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE file (
     id serial primary key,
@@ -99,8 +96,7 @@ CREATE TABLE file (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS instance")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE instance (
     id serial primary key,
@@ -115,8 +111,7 @@ CREATE TABLE instance (
 )"""
         )
 
-        conn.execute("DROP TABLE IF EXISTS site_config")
-        conn.execute(
+    conn.execute(
             """
 CREATE TABLE site_config (
     id serial primary key,
@@ -125,27 +120,27 @@ CREATE TABLE site_config (
 )"""
         )
 
-        conn.execute(
+    conn.execute(
             """CREATE VIEW view_task_in_problem AS (
   SELECT t.id as task_id, problem_id, title, (RANK() OVER (PARTITION BY problem_id ORDER BY t.id)) AS task_order FROM task AS t, problem AS p WHERE t.problem_id = p.id ORDER BY task_id
 )"""
         )
 
-        conn.execute(
+    conn.execute(
             """CREATE VIEW view_user_solve AS (
 WITH s AS (SELECT problem_id, task_id, user_id, submit_time FROM accepted_submit AS a, task WHERE a.task_id = task.id)
 SELECT s.*, username FROM s JOIN user_info ON s.user_id = user_info.id WHERE user_info.is_visible
 )"""
         )
 
-        conn.execute(
+    conn.execute(
             """CREATE VIEW view_task_solve_cnt AS (
 WITH s AS (SELECT a.* FROM accepted_submit AS a JOIN user_info AS u ON u.id = a.user_id WHERE u.is_visible),
 t AS (SELECT task_id, count(*) as cnt FROM s GROUP BY task_id)
 SELECT task.problem_id, task.id as task_id, coalesce(cnt, 0) AS cnt FROM t RIGHT JOIN task ON task.id = t.task_id ORDER BY task_id
 )"""
         )
-        conn.execute(
+    conn.execute(
             """CREATE VIEW view_task_score AS (
 --  SELECT task.*, base_point AS point FROM task ORDER BY task.id
 WITH decay_lambda AS (SELECT config_value::INTEGER FROM site_config WHERE config_key = 'decay_lambda'),
@@ -160,14 +155,40 @@ SELECT task.*, s.point FROM s JOIN task ON s.task_id = task.id
 )"""
         )
 
+
+def do_erase_db():
+    print("Erase database...")
+
+    os.makedirs("upload", exist_ok=True)
+    os.system("rm -f upload/*")
+
+    with db_pool.connection() as conn:
+        _drop_schema(conn)
+        _create_schema(conn)
+
+
 @click.command("erase-db")
 def erase_db():
-    do_erase_db()
+    try:
+        do_erase_db()
+    finally:
+        db_pool.close()
+
 
 def do_init_db():
     print("Init database...")
+    os.makedirs("upload", exist_ok=True)
 
     with db_pool.connection() as conn:
+        exists = conn.execute(
+            "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'user_info'"
+        ).fetchone()
+        if exists:
+            if conn.execute("SELECT 1 FROM user_info LIMIT 1").fetchone():
+                print("database already initialized, skip")
+                return
+        else:
+            _create_schema(conn)
         conn.execute(
             "INSERT INTO problem(title, description, tag, is_visible) VALUES (%s, %s, %s, true)",
             [
@@ -183,7 +204,7 @@ def do_init_db():
                 "跑马场",
                 "送🐴啦！送🐴啦！flag 在环境变量。",
                 "private",
-                '{"image": "runma_app", "mem_limit": "50m"}',
+                '{"image": "runma-app", "mem_limit": "50m"}',
             ],
         )
 
@@ -233,14 +254,20 @@ def check(s):
                 tasks,
             )
 
-        lilac_passwd = secrets.token_urlsafe(10)
+        admin_user = os.getenv("INIT_ADMIN_USER")
+        admin_passwd = os.getenv("INIT_ADMIN_PASSWORD")
+        if not admin_user or not admin_passwd:
+            raise RuntimeError(
+                "INIT_ADMIN_USER and INIT_ADMIN_PASSWORD must be set"
+            )
 
-        print('admin user: [blue]lilac[/blue]')
-        print(f'password: [red]{lilac_passwd}[/red]')
+        print(f'admin user: [blue]{admin_user}[/blue]')
+        print(f'password: [red]{admin_passwd}[/red]')
+        print(f'INIT_ADMIN_USER={admin_user} INIT_ADMIN_PASSWORD={admin_passwd}')
 
         conn.execute(
             "INSERT INTO user_info(email, username, password, is_admin, is_visible) VALUES (%s, %s, %s, true, false)",
-            ["ctf@hit.edu.cn", "lilac", bcrypt_sha256.hash(lilac_passwd)],
+            [f"{admin_user}@localhost", admin_user, bcrypt_sha256.hash(admin_passwd)],
         )
 
         with conn.cursor() as cur:
@@ -263,4 +290,7 @@ def check(s):
 
 @click.command("init-db")
 def init_db():
-    do_init_db()
+    try:
+        do_init_db()
+    finally:
+        db_pool.close()

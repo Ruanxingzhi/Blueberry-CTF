@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:18.6
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      PGTZ: Asia/Shanghai
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: blueberry
+    volumes:
+      - ./pgsql_data:/var/lib/postgresql
+    ports:
+      - "${PGSQL_LISTEN}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d blueberry"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: "1"
+      FLASK_APP: app
+      PGSQL_URI: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/blueberry
+      SECRET_KEY: ${SECRET_KEY}
+      FLAG_GEN_KEY: ${FLAG_GEN_KEY}
+      INIT_ADMIN_USER: ${INIT_ADMIN_USER}
+      INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD}
+    ports:
+      - "${WEB_LISTEN}:11451"
+    volumes:
+      - ./web:/app
+    command: ["gunicorn", "--reload", "app:app"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:11451/', timeout=5)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  backend:
+    build: ./instance-manager
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      PYTHONUNBUFFERED: "1"
+      PGSQL_URI: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/blueberry
+      FLAG_GEN_KEY: ${FLAG_GEN_KEY}
+      INSTANCE_PORT_START: ${INSTANCE_PORT_START}
+      INSTANCE_PORT_END: ${INSTANCE_PORT_END}
+    volumes:
+      - ./instance-manager:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  adminer:
+    image: adminer:6.0.1
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${ADMINER_LISTEN}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db

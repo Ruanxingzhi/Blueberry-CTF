@@ -8,22 +8,14 @@ RUN echo "deb ${DEBIAN_MIRROR} trixie main" > /etc/apt/sources.list \
     && apt-get update \
     && apt-get -y install --no-install-recommends \
         python3 \
+        python3-docker \
         python3-dotenv \
-        python3-flask \
         python3-psycopg-pool \
-        python3-passlib \
-        python3-psutil \
-        python3-gevent \
         python3-rich \
         python3-pycryptodome \
-        gunicorn \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . /app
+COPY docker-backend.py /app/docker-backend.py
 
-ENV FLASK_APP=app
-EXPOSE 11451
-
-ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]
-CMD ["gunicorn", "app:app"]
+CMD ["python3", "docker-backend.py"]
