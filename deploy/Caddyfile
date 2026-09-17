@@ -1,3 +1,9 @@
+{
+	servers {
+		protocols h1 h2
+	}
+}
+
 :80 {
 	reverse_proxy 127.0.0.1:11451
 }
