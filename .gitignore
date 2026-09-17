@@ -4,3 +4,6 @@ __pycache__
 .env
 web/upload/
 pgsql_data/
+problems/*
+!problems/runma/
+!problems/runma/**
