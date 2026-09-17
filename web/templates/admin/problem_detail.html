@@ -101,6 +101,18 @@
                 </div>
             </div>
             <div class="field">
+                <label>First three blood bonus</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="is_blood_bonus" value="{{t.is_blood_bonus}}">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="True"><i class="red tint icon"></i>Enabled - 1st +5% / 2nd +3% / 3rd +2%</div>
+                        <div class="item" data-value="False"><i class="grey tint icon"></i>Disabled</div>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
               <label>Checker</label>
               <textarea name="checker" style="font-family: Consolas;" rows="3">{{t.checker}}</textarea>
               <div style="padding-top: 0.5rem">
@@ -126,6 +138,18 @@
             <div class="field">
               <label>Base point</label>
               <input type="text" name="point" placeholder=" " required>
+            </div>
+            <div class="field">
+                <label>First three blood bonus</label>
+                <div class="ui selection dropdown">
+                    <input type="hidden" name="is_blood_bonus" value="True">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Select</div>
+                    <div class="menu">
+                        <div class="item" data-value="True"><i class="red tint icon"></i>Enabled - 1st +5% / 2nd +3% / 3rd +2%</div>
+                        <div class="item" data-value="False"><i class="grey tint icon"></i>Disabled</div>
+                    </div>
+                </div>
             </div>
             <div class="field">
               <label>Checker</label>

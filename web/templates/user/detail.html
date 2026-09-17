@@ -58,7 +58,7 @@
                         <tr>
                             <div style="display: none">#{{s.task_id}}</div>
                             <td><a href="{{url_for('problem.show_problem_detail', pid=s.problem_id)}}">{{s.title}}</a><span class="ui grey text"> - Task {{s.task_order}}</span></td>
-                            <td>{{s.point}}</td>
+                            <td>{{s.point}}{% if s.blood_bonus %} <span class="ui red mini label">+{{s.blood_bonus}}</span>{% endif %}</td>
                             <td>{{s.submit_time}}</td>
                         </tr>
                         {% endfor %}

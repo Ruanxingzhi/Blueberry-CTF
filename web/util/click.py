@@ -41,7 +41,8 @@ CREATE TABLE task (
     problem_id integer not null,
     base_point integer not null,
     score_calc_type integer default 0 not null, 
-    checker text not null
+    checker text not null,
+    is_blood_bonus boolean not null default true
 )"""
         )
 
@@ -127,13 +128,6 @@ CREATE TABLE site_config (
         )
 
     conn.execute(
-            """CREATE VIEW view_user_solve AS (
-WITH s AS (SELECT problem_id, task_id, user_id, submit_time FROM accepted_submit AS a, task WHERE a.task_id = task.id)
-SELECT s.*, username FROM s JOIN user_info ON s.user_id = user_info.id WHERE user_info.is_visible
-)"""
-        )
-
-    conn.execute(
             """CREATE VIEW view_task_solve_cnt AS (
 WITH s AS (SELECT a.* FROM accepted_submit AS a JOIN user_info AS u ON u.id = a.user_id WHERE u.is_visible),
 t AS (SELECT task_id, count(*) as cnt FROM s GROUP BY task_id)
@@ -152,6 +146,40 @@ s AS (SELECT task_id, (
   END
 ) AS point FROM r)
 SELECT task.*, s.point FROM s JOIN task ON s.task_id = task.id
+)"""
+        )
+    conn.execute(
+            """CREATE VIEW view_user_solve AS (
+WITH ranked AS (
+  SELECT
+    a.id AS submit_id,
+    task.problem_id,
+    a.task_id,
+    a.user_id,
+    a.submit_time,
+    task.is_blood_bonus,
+    ROW_NUMBER() OVER (PARTITION BY a.task_id ORDER BY a.submit_time, a.id) AS blood_rank
+  FROM accepted_submit AS a
+  JOIN task ON a.task_id = task.id
+  JOIN user_info ON a.user_id = user_info.id
+  WHERE user_info.is_visible
+),
+scored AS (
+  SELECT
+    ranked.*,
+    user_info.username,
+    view_task_score.point AS task_point,
+    CASE
+      WHEN ranked.is_blood_bonus AND ranked.blood_rank = 1 THEN ROUND(view_task_score.point * 0.05)
+      WHEN ranked.is_blood_bonus AND ranked.blood_rank = 2 THEN ROUND(view_task_score.point * 0.03)
+      WHEN ranked.is_blood_bonus AND ranked.blood_rank = 3 THEN ROUND(view_task_score.point * 0.02)
+      ELSE 0
+    END AS blood_bonus
+  FROM ranked
+  JOIN user_info ON ranked.user_id = user_info.id
+  JOIN view_task_score ON view_task_score.id = ranked.task_id
+)
+SELECT scored.*, (task_point + blood_bonus) AS point FROM scored
 )"""
         )
 

@@ -81,8 +81,10 @@ def show_problem_detail(pid):
         with db_pool.connection() as conn:
             submit_id = conn.execute('INSERT INTO log_flag(task_id, user_id, flag) VALUES (%s, %s, %s) RETURNING id', [
                                      task_id, g.user['id'], flag]).fetchone()['id']
-            checker = conn.execute('SELECT checker FROM task WHERE id = %s', [
-                                   task_id]).fetchone()['checker']
+            task_row = conn.execute('SELECT checker, is_blood_bonus FROM task WHERE id = %s', [
+                                   task_id]).fetchone()
+            checker = task_row['checker']
+            is_blood_bonus = task_row['is_blood_bonus']
         
         try:
             res, checker_msg = check_flag(
@@ -102,16 +104,38 @@ def show_problem_detail(pid):
         else:
             if res:
                 msg = checker_msg or 'Accepted. Congratulations!'
-                flash(msg, 'success')
-
                 end_time = current_app.config['END_TIME']
 
                 if end_time and datetime.now() > end_time:
+                    flash(msg, 'success')
                     flash('Contest time exceeded :(', 'info')
                 else:
                     with db_pool.connection() as conn:
-                        conn.execute('INSERT INTO accepted_submit(task_id, user_id, flag, flag_log_id) VALUES (%s, %s, %s, %s)', [
-                                    task_id, g.user['id'], flag, submit_id])
+                        # UNIQUE (task_id, user_id) is the real guard against double scoring.
+                        # Check-then-insert above is not atomic across workers/greenlets.
+                        inserted = conn.execute(
+                            '''INSERT INTO accepted_submit(task_id, user_id, flag, flag_log_id)
+                               VALUES (%s, %s, %s, %s)
+                               ON CONFLICT (task_id, user_id) DO NOTHING
+                               RETURNING id''',
+                            [task_id, g.user['id'], flag, submit_id]
+                        ).fetchone()
+                        blood_rank = None
+                        if inserted and is_blood_bonus:
+                            blood_row = conn.execute(
+                                'SELECT blood_rank FROM view_user_solve WHERE task_id = %s AND user_id = %s',
+                                [task_id, g.user['id']]
+                            ).fetchone()
+                            if blood_row:
+                                blood_rank = blood_row['blood_rank']
+
+                    flash(msg, 'success')
+                    if blood_rank == 1:
+                        flash('First blood! +5% bonus', 'info')
+                    elif blood_rank == 2:
+                        flash('Second blood! +3% bonus', 'info')
+                    elif blood_rank == 3:
+                        flash('Third blood! +2% bonus', 'info')
             else:
                 msg = checker_msg or 'Incorrect flag.'
                 flash(msg, 'warning')
@@ -140,7 +164,10 @@ def show_problem_detail(pid):
         g.points = list(conn.execute('SELECT id, point FROM view_task_score WHERE problem_id = %s', [pid]))
         g.files = list(conn.execute('SELECT * FROM file WHERE problem_id = %s ORDER BY id', [pid]))
         solver_list = list(conn.execute(
-            'SELECT task_id, username, submit_time, user_id FROM view_user_solve WHERE problem_id = %s ORDER BY submit_time', [pid]))
+            'SELECT task_id, username, submit_time, user_id, blood_rank, blood_bonus FROM view_user_solve WHERE problem_id = %s ORDER BY task_id, blood_rank', [pid]))
+        user_blood = list(conn.execute(
+            'SELECT task_id, blood_bonus FROM view_user_solve WHERE problem_id = %s AND user_id = %s',
+            [pid, g.user['id']]))
 
     g.detail['tag_list'] = parse_tags(g.detail.pop('tag'))
     g.accepted = [x['task_id'] for x in g.accepted]
@@ -158,8 +185,9 @@ def show_problem_detail(pid):
     
     g.solves = sorted(g.solves.items())
 
+    blood_by_task = {x['task_id']: x['blood_bonus'] for x in user_blood}
     g.total_points = sum([x['point'] for x in g.points])
-    g.solved_points = sum([x['point'] for x in g.points if x['id'] in g.accepted])
+    g.solved_points = sum([x['point'] + blood_by_task.get(x['id'], 0) for x in g.points if x['id'] in g.accepted])
 
     for index in range(len(g.tasks)):
         g.tasks[index]['id_in_problem'] = index + 1

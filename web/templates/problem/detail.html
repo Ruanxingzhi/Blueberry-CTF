@@ -31,6 +31,15 @@
                                                 <td class="two wide">
                                                     <a
                                                         onclick="window.location.href = '{{url_for('user.show_user_detail', uid=u.user_id)}}'">{{u.username}}</a>
+                                                    {% if u.blood_bonus %}
+                                                    {% if u.blood_rank == 1 %}
+                                                    <span class="ui red mini label">1st</span>
+                                                    {% elif u.blood_rank == 2 %}
+                                                    <span class="ui orange mini label">2nd</span>
+                                                    {% elif u.blood_rank == 3 %}
+                                                    <span class="ui yellow mini label">3rd</span>
+                                                    {% endif %}
+                                                    {% endif %}
                                                 </td>
                                                 <td class="three wide">{{u.submit_time}}</td>
                                             </tr>

@@ -128,8 +128,12 @@ def show_user_detail(uid):
     with db_pool.connection() as conn:
         info = conn.execute('SELECT * FROM user_info WHERE id = %s', [uid]).fetchone()
         g.solves = list(conn.execute('''
-WITH g AS (SELECT u.*, v.point FROM view_user_solve as u JOIN view_task_score as v ON u.task_id = v.id WHERE user_id = %s),
-r AS (SELECT g.*, task_order FROM g JOIN view_task_in_problem AS v ON g.task_id = v.task_id)
+WITH r AS (
+  SELECT u.*, task_order
+  FROM view_user_solve AS u
+  JOIN view_task_in_problem AS v ON u.task_id = v.task_id
+  WHERE user_id = %s
+)
 SELECT r.*, title FROM r JOIN problem ON r.problem_id = problem.id ORDER BY submit_time desc
         ''', [uid]))
     

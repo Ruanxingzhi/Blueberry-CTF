@@ -191,11 +191,12 @@ def api_modify_task(tid):
     point = request.form.get("point")
     checker = request.form.get("checker")
     score_calc_type = request.form.get("score_calc_type")
+    is_blood_bonus = request.form.get("is_blood_bonus")
 
     with db_pool.connection() as conn:
         pid = conn.execute(
-            "UPDATE task SET base_point = %s, checker = %s, score_calc_type = %s WHERE id = %s RETURNING problem_id",
-            [point, checker, score_calc_type, tid],
+            "UPDATE task SET base_point = %s, checker = %s, score_calc_type = %s, is_blood_bonus = %s WHERE id = %s RETURNING problem_id",
+            [point, checker, score_calc_type, is_blood_bonus, tid],
         ).fetchone()
 
     return redirect(url_for("admin.show_problem_detail", pid=pid["problem_id"]))
@@ -205,11 +206,12 @@ def api_modify_task(tid):
 def api_add_task(pid):
     point = request.form.get("point")
     checker = request.form.get("checker")
+    is_blood_bonus = request.form.get("is_blood_bonus", "True")
 
     with db_pool.connection() as conn:
         conn.execute(
-            "INSERT INTO task(problem_id, base_point, checker) VALUES (%s, %s, %s)",
-            [pid, point, checker],
+            "INSERT INTO task(problem_id, base_point, checker, is_blood_bonus) VALUES (%s, %s, %s, %s)",
+            [pid, point, checker, is_blood_bonus],
         )
 
     return redirect(url_for("admin.show_problem_detail", pid=pid))
