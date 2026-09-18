@@ -48,8 +48,8 @@
                 <table class="ui fixed very basic single line table">
                     <thead>
                         <tr>
-                            <th class="three wide">Task</th>
-                            <th class="two wide">Points</th>
+                            <th class="five wide">Task</th>
+                            <th class="four wide">Points</th>
                             <th class="four wide">Submit time</th>
                         </tr>
                     </thead>
@@ -58,7 +58,15 @@
                         <tr>
                             <div style="display: none">#{{s.task_id}}</div>
                             <td><a href="{{url_for('problem.show_problem_detail', pid=s.problem_id)}}">{{s.title}}</a><span class="ui grey text"> - Task {{s.task_order}}</span></td>
-                            <td>{{s.point}}{% if s.blood_bonus %} <span class="ui red mini label">+{{s.blood_bonus}}</span>{% endif %}</td>
+                            <td>{{s.point}}{% if s.blood_bonus %}
+                            {% if s.blood_rank == 1 %}
+                            <span class="ui red mini label">1st<div class="detail">+{{s.blood_bonus}}</div></span>
+                            {% elif s.blood_rank == 2 %}
+                            <span class="ui orange mini label">2nd<div class="detail">+{{s.blood_bonus}}</div></span>
+                            {% elif s.blood_rank == 3 %}
+                            <span class="ui yellow mini label">3rd<div class="detail">+{{s.blood_bonus}}</div></span>
+                            {% endif %}
+                            {% endif %}</td>
                             <td>{{s.submit_time}}</td>
                         </tr>
                         {% endfor %}
