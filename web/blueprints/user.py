@@ -134,7 +134,7 @@ WITH r AS (
   JOIN view_task_in_problem AS v ON u.task_id = v.task_id
   WHERE user_id = %s
 )
-SELECT r.*, title FROM r JOIN problem ON r.problem_id = problem.id ORDER BY submit_time desc
+SELECT r.*, title FROM r JOIN problem ON r.problem_id = problem.id WHERE problem.is_visible ORDER BY submit_time desc
         ''', [uid]))
     
     if not info:
