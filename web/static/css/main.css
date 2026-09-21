@@ -98,11 +98,24 @@
     display: none;
 }
 
+.markd {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.markd pre,
+.markd pre code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+
 .markd p>code {
     padding: .2rem .4rem;
     margin: 0;
     font-size: 85%;
     white-space: break-spaces;
+    overflow-wrap: anywhere;
     background-color: rgba(175, 184, 193, 0.2);
     border-radius: .4rem;
 }
